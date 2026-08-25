@@ -8,7 +8,8 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-       ViewBag.Message = "Hello, World!";
+        string msg = "Hello, World!";
+        ViewBag.Message = msg;
 
         return View();
     }
