@@ -36,3 +36,8 @@ jobs:
       - name: Publish
         run: dotnet publish MvcActionsDemo.Web/MvcActionsDemo.Web.csproj --configuration Release --no-restore --output ./publish
         
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mvc-publish
+          path: ./publish
