@@ -8,7 +8,7 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-        string name = 123;
+        string name = "Test";
 
         return View();
     }
