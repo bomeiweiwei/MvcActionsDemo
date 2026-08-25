@@ -44,7 +44,7 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t mvc-actions-demo:ci .
-  azure-login-test:
+  push-docker-image:
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
 
@@ -59,3 +59,12 @@ jobs:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to Azure Container Registry
+        run: az acr login --name mvcactionsdemodev
+
+      - name: Build Docker image for ACR
+        run: docker build -t mvcactionsdemodev.azurecr.io/mvc-actions-demo:dev .
+
+      - name: Push Docker image to ACR
+        run: docker push mvcactionsdemodev.azurecr.io/mvc-actions-demo:dev
