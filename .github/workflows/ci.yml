@@ -41,3 +41,6 @@ jobs:
         with:
           name: mvc-publish
           path: ./publish
+
+      - name: Build Docker image
+        run: docker build -t mvc-actions-demo:ci .
