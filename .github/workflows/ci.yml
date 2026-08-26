@@ -45,6 +45,7 @@ jobs:
       - name: Build Docker image
         run: docker build -t mvc-actions-demo:ci .
   push-docker-image:
+    needs: build-and-test
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
 
@@ -67,7 +68,37 @@ jobs:
         run: az acr login --name mvcactionsdemodev
 
       - name: Build Docker image for ACR
-        run: docker build -t mvcactionsdemodev.azurecr.io/mvc-actions-demo:dev .
+        run: |
+          docker build \
+            -t mvcactionsdemodev.azurecr.io/mvc-actions-demo:dev \
+            -t mvcactionsdemodev.azurecr.io/mvc-actions-demo:${{ github.sha }} \
+            .
 
       - name: Push Docker image to ACR
-        run: docker push mvcactionsdemodev.azurecr.io/mvc-actions-demo:dev
+        run: |
+          docker push mvcactionsdemodev.azurecr.io/mvc-actions-demo:dev
+          docker push mvcactionsdemodev.azurecr.io/mvc-actions-demo:${{ github.sha }}
+  deploy-container-app:
+    needs: push-docker-image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Container Apps
+        run: |
+          az config set extension.use_dynamic_install=yes_without_prompt
+          az containerapp update \
+            --name ca-mvc-actions-demo-dev \
+            --resource-group rg-mvc-actions-demo-dev \
+            --image mvcactionsdemodev.azurecr.io/mvc-actions-demo:${{ github.sha }}
