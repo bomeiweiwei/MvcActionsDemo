@@ -8,7 +8,7 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-        string msg = "Hello, World!";
+        string msg = "Hello, Azure Container Apps!";
         ViewBag.Message = msg;
 
         return View();
